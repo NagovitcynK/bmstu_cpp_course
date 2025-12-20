@@ -23,7 +23,7 @@ class stack
 	template <typename... Args>
 	void emplace(Args&&... args)
 	{
-		T* new_data = static_cast<T*>(::operator new((size_ + 1) * sizeof(T)));
+		T* new_data = static_cast<T*>(operator new((size_ + 1) * sizeof(T)));
 		for (size_t i = 0; i < size_; i++)
 		{
 			new (new_data + i) T(std::move(data_[i]));
@@ -42,10 +42,9 @@ class stack
 	void pop()
 	{
 		if (empty())
-			throw std::underflow_error("empty");
+			throw std::underflow_error("empty_error");
 		data_[size_ - 1].~T();
 		size_--;
-		// Можно не уменьшать массив — оставляем старую память для упрощения
 	}
 
 	void clear() noexcept
@@ -58,14 +57,14 @@ class stack
 	T& top()
 	{
 		if (empty())
-			throw std::underflow_error("empty");
+			throw std::underflow_error("empty_error");
 		return data_[size_ - 1];
 	}
 
 	const T& top() const
 	{
 		if (empty())
-			throw std::underflow_error("empty");
+			throw std::underflow_error("empty_error");
 		return data_[size_ - 1];
 	}
 
