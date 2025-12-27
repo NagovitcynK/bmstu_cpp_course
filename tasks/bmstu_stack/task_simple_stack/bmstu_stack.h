@@ -50,25 +50,7 @@ class stack
 	void clear() noexcept
 	{
 		for (size_t i = size_; i > 0; i--)
-			data_[i].~T();
-		size_ = 0;
-	}
-	void clear1() noexcept
-	{
-		for (size_t i = size_; i > 0; i--)
-		{
-			data_[i].~T();
-			std::cout << data_[i] << " ";
-		}
-		size_ = 0;
-	}
-	void clear2() noexcept
-	{
-		for (size_t i = 0; i < size_; i++)
-		{
-			std::cout << data_[i] << " ";
-			data_[i].~T();
-		}
+			data_[i - 1].~T();
 		size_ = 0;
 	}
 
@@ -85,6 +67,56 @@ class stack
 			throw std::underflow_error("empty_error");
 		return data_[size_ - 1];
 	}
+
+	stack(const stack& other) : data_(nullptr), size_(0)
+	{
+		data_ = (T*)operator new(sizeof(T) * other.size_);
+		size_ = other.size_;
+		for (size_t i = 0; i < size_; ++i)
+		{
+			new (data_ + i) T(other.data_[i]);
+		}
+	}
+
+	stack& operator=(const stack& other)
+	{
+		if (this != &other)
+		{
+			clear();
+			operator delete(data_);
+			data_ = (T*)operator new(sizeof(T) * other.size_);
+			size_ = other.size_;
+			for (size_t i = 0; i < size_; ++i)
+			{
+				new (data_ + i) T(other.data_[i]);
+			}
+		}
+		return *this;
+	}
+
+	stack(stack&& other) noexcept : data_(nullptr), size_(0)
+	{
+		data_ = other.data_;
+		size_ = other.size_;
+		other.data_ = nullptr;
+		other.size_ = 0;
+	}
+
+	stack& operator=(stack&& other) noexcept
+	{
+		if (this != &other)
+		{
+			clear();
+			operator delete(data_);
+			data_ = other.data_;
+			size_ = other.size_;
+			other.data_ = nullptr;
+			other.size_ = 0;
+		}
+		return *this;
+	}
+
+	T* data() const { return data_; }
 
    private:
 	T* data_;
